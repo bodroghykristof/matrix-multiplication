@@ -5,8 +5,12 @@ import com.codecool.matrixmultiplication.utility.RandomUtils;
 public class Matrix {
 
     private final int[][] matrix;
+    private final int rows;
+    private final int columns;
 
     public Matrix(int rows, int columns, int lowerLimitInclusive, int upperLimitInclusive) {
+        this.rows = rows;
+        this.columns = columns;
         this.matrix = new int[rows][columns];
         generateMatrix(lowerLimitInclusive, upperLimitInclusive);
     }
