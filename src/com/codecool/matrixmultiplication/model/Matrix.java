@@ -23,6 +23,10 @@ public class Matrix {
         }
     }
 
+    public Matrix multiply(Matrix matrix) {
+        return this;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
