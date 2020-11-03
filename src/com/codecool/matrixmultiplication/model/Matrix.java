@@ -12,11 +12,13 @@ public class Matrix {
     private final int rows;
     private final int columns;
 
+
     public Matrix(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
         this.matrix = new int[rows][columns];
     }
+
 
     public Matrix(int rows, int columns, int lowerLimitInclusive, int upperLimitInclusive, MatrixFactory matrixFactory) {
         this.rows = rows;
@@ -25,44 +27,75 @@ public class Matrix {
         this.matrix = matrixFactory.generateRandomMatrix(rows, columns, lowerLimitInclusive, upperLimitInclusive);
     }
 
+
     public int getRows() {
         return rows;
     }
+
 
     public int getColumns() {
         return columns;
     }
 
+
     public int get(int row, int column) {
+
         try {
             return matrix[row][column];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException
                     ("Could not fetch the desired value as it is out of bounds for the given matrix.");
         }
+
     }
 
+
     public void set(int row, int column, int value) {
+
         try {
             matrix[row][column] = value;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException
                     ("Could not set the desired value as it is out of bounds for the given matrix.");
         }
+
     }
+
+
+    public Optional<Matrix> multiply(Matrix matrix) {
+
+        if (checkInvalidMatrices(matrix)) return Optional.empty();
+
+        long start = System.nanoTime();
+        Matrix product = matrixFactory.calculateProduct(this, matrix);
+        System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
+
+        return Optional.of(product);
+    }
+
 
     public Optional<Matrix> multiply(Matrix matrix, int threads) {
 
-        if (this.columns != matrix.rows) {
-            System.out.println("Matrices could not be multiplied " +
-                    "as Matrix One needs to have as many columns as the number of rows in Matrix Two");
-            return Optional.empty();
-        }
+        if (checkInvalidMatrices(matrix)) return Optional.empty();
 
         long start = System.nanoTime();
         Matrix product = matrixFactory.calculateProduct(this, matrix, threads);
         System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
+
         return Optional.of(product);
+    }
+
+
+    private boolean checkInvalidMatrices(Matrix matrix) {
+
+        if (this.columns != matrix.rows) {
+            System.out.println("Matrices could not be multiplied " +
+                    "as Matrix One needs to have as many columns as the number of rows in Matrix Two");
+            return true;
+        }
+
+        return false;
+
     }
 
 
