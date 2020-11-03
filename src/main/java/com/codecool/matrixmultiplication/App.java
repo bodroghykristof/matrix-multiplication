@@ -2,11 +2,15 @@ package com.codecool.matrixmultiplication;
 
 import com.codecool.matrixmultiplication.business.MatrixFactory;
 import com.codecool.matrixmultiplication.model.Matrix;
+import org.knowm.xchart.CategoryChart;
+import org.knowm.xchart.CategoryChartBuilder;
+import org.knowm.xchart.SwingWrapper;
+import org.knowm.xchart.style.Styler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class App {
 
@@ -18,10 +22,12 @@ public class App {
         List<Integer> threads = Arrays.asList(0, 1, 2, 3, 4, 5);
         int repeatTime = 3;
 
+        CategoryChart chart = new CategoryChartBuilder().width(800).height(600).title("Time vs. Threads").xAxisTitle("Matrix Size").yAxisTitle("Time").theme(Styler.ChartTheme.GGPlot2).build();
 
-        for (int size : sizes) {
-            for (int thread : threads) {
-                for (int i = 0; i < 1; i++) {
+
+        for (int thread : threads) {
+            List<Long> timeValues = new ArrayList<>();
+            for (int size : sizes) {
                     Matrix matrixOne = new Matrix(size, size, 0, 9, matrixFactory);
                     Matrix matrixTwo = new Matrix(size, size, 0, 9, matrixFactory);
                     Date start = new Date();
@@ -29,9 +35,10 @@ public class App {
                         matrixOne.multiply(matrixTwo, thread);
                     }
                     Date end = new Date();
-                    System.out.printf("Time taken in milli seconds for %d threads on %s size: %s%n", thread, size, (end.getTime() - start.getTime()));
-                }
+                    timeValues.add(end.getTime() - start.getTime());
             }
+            chart.addSeries(String.format("%d thread(s)", thread), sizes, timeValues);
         }
+        new SwingWrapper<>(chart).displayChart();
     }
 }
