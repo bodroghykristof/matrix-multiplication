@@ -13,12 +13,16 @@ public class App {
 
     private static final List<Integer> sizes = Arrays.asList(10, 50, 100, 200, 500, 1000);
     private static final List<Integer> threads = Arrays.asList(0, 1, 2, 3, 4, 5);
+    private static MatrixFactory matrixFactory = new MatrixFactory();
+    private static DataPresenter presenter = new XChartPresenter("Thread Optimization", "Size of Matrix", "Time [ms]");;
 
     public static void main(String[] args) {
+        presenter.startLoading();
+        executeMatrixTasks();
+        presenter.finishLoading();
+    }
 
-        MatrixFactory matrixFactory = new MatrixFactory();
-        DataPresenter presenter = new XChartPresenter("Thread Optimization", "Size of Matrix", "Time [ms]");
-
+    private static void executeMatrixTasks() {
         for (int thread : threads) {
             List<Long> timeValues = new ArrayList<>();
             for (int size : sizes) {
@@ -35,5 +39,6 @@ public class App {
     private static int defineRepeatTime(int size) {
         //TODO: make column heights more similar
         return (int) (1000000 / Math.pow(size, 2));
+//        return 1;
     }
 }

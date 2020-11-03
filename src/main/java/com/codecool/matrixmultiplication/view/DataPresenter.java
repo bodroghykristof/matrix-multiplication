@@ -8,4 +8,7 @@ public abstract class DataPresenter {
 
     public abstract void presentStatistics();
 
+    public abstract void startLoading();
+
+    public abstract void finishLoading();
 }
