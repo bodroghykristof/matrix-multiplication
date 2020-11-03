@@ -2,6 +2,8 @@ package com.codecool.matrixmultiplication;
 
 import com.codecool.matrixmultiplication.model.Matrix;
 
+import java.util.Optional;
+
 public class App {
 
     public static void main(String[] args) {
@@ -11,12 +13,12 @@ public class App {
         System.out.println(matrixOne);
 
         System.out.println("Matrix Two:");
-        Matrix matrixTwo = new Matrix(2, 6, 0, 9);
+        Matrix matrixTwo = new Matrix(5, 6, 0, 9);
         System.out.println(matrixTwo);
 
         System.out.println("Product Matrix:");
-        Matrix product = matrixOne.multiply(matrixTwo);
-        System.out.println(product);
+        Optional<Matrix> product = matrixOne.multiply(matrixTwo);
+        product.ifPresent(System.out::println);
 
     }
 
