@@ -1,16 +1,13 @@
 package com.codecool.matrixmultiplication.model;
 
-import com.codecool.matrixmultiplication.utility.RandomUtils;
+import com.codecool.matrixmultiplication.business.MatrixFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public class Matrix {
 
+    private MatrixFactory matrixFactory;
     private final int[][] matrix;
     private final int rows;
     private final int columns;
@@ -21,11 +18,19 @@ public class Matrix {
         this.matrix = new int[rows][columns];
     }
 
-    public Matrix(int rows, int columns, int lowerLimitInclusive, int upperLimitInclusive) {
+    public Matrix(int rows, int columns, int lowerLimitInclusive, int upperLimitInclusive, MatrixFactory matrixFactory) {
         this.rows = rows;
         this.columns = columns;
-        this.matrix = new int[rows][columns];
-        generateMatrix(lowerLimitInclusive, upperLimitInclusive);
+        this.matrixFactory = matrixFactory;
+        this.matrix = matrixFactory.generateRandomMatrix(rows, columns, lowerLimitInclusive, upperLimitInclusive);
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getColumns() {
+        return columns;
     }
 
     public int get(int row, int column) {
@@ -46,14 +51,6 @@ public class Matrix {
         }
     }
 
-    private void generateMatrix(int lowerLimitInclusive, int upperLimitInclusive) {
-        for (int[] row : matrix) {
-            for (int i = 0; i < row.length; i++) {
-                row[i] = RandomUtils.randomizeInRange(lowerLimitInclusive, upperLimitInclusive);
-            }
-        }
-    }
-
     public Optional<Matrix> multiply(Matrix matrix, int threads) {
 
         if (this.columns != matrix.rows) {
@@ -63,39 +60,11 @@ public class Matrix {
         }
 
         long start = System.nanoTime();
-        Matrix product = calculateProductValues(matrix, threads);
+        Matrix product = matrixFactory.calculateProduct(this, matrix, threads);
         System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
         return Optional.of(product);
     }
 
-    private Matrix calculateProductValues(Matrix matrix, int threads) {
-
-        Matrix product = new Matrix(this.rows, matrix.columns);
-        ExecutorService executor = Executors.newFixedThreadPool(threads);
-        List<Callable<Object>> tasks = new ArrayList<>();
-
-        for (int rowIndex = 0; rowIndex < product.rows; rowIndex++) {
-            int finalRowIndex = rowIndex;
-            Runnable runnable = () -> {
-                for (int columnIndex = 0; columnIndex < product.columns; columnIndex++) {
-                    int value = 0;
-                    for (int i = 0; i < this.columns; i++) {
-                        value += (this.get(finalRowIndex, i) * matrix.get(i, columnIndex));
-                    }
-                    product.set(finalRowIndex, columnIndex, value);
-                }
-            };
-            tasks.add(Executors.callable(runnable));
-        }
-
-        try {
-            executor.invokeAll(tasks);
-            executor.shutdown();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return product;
-    }
 
     @Override
     public String toString() {
