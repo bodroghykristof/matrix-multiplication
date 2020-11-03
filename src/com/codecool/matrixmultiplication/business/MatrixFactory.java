@@ -44,9 +44,9 @@ public class MatrixFactory {
 
         Matrix product = new Matrix(matrixOne.getRows(), matrixTwo.getColumns());
         ExecutorService executor = Executors.newFixedThreadPool(threads);
-        List<Callable<Object>> tasks = new ArrayList<>();
+        if (threads == 5) executor = Executors.newWorkStealingPool();
 
-        createThreadsForMultiplication(matrixOne, matrixTwo, product, tasks);
+        List<Callable<Object>> tasks = createTasksForMultiplication(matrixOne, matrixTwo, product);
 
         try {
             executor.invokeAll(tasks);
@@ -58,7 +58,9 @@ public class MatrixFactory {
     }
 
 
-    private void createThreadsForMultiplication(Matrix matrixOne, Matrix matrixTwo, Matrix product, List<Callable<Object>> tasks) {
+    private List<Callable<Object>> createTasksForMultiplication(Matrix matrixOne, Matrix matrixTwo, Matrix product) {
+
+        List<Callable<Object>> tasks = new ArrayList<>();
 
         for (int rowIndex = 0; rowIndex < product.getRows(); rowIndex++) {
             int finalRowIndex = rowIndex;
@@ -68,6 +70,7 @@ public class MatrixFactory {
             tasks.add(Executors.callable(runnable));
         }
 
+        return tasks;
     }
 
 

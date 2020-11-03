@@ -61,27 +61,9 @@ public class Matrix {
 
     }
 
-
-    public Optional<Matrix> multiply(Matrix matrix) {
-
-        if (checkInvalidMatrices(matrix)) return Optional.empty();
-
-        long start = System.nanoTime();
-        Matrix product = matrixFactory.calculateProduct(this, matrix);
-        System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
-
-        return Optional.of(product);
-    }
-
-
     public Optional<Matrix> multiply(Matrix matrix, int threads) {
-
         if (checkInvalidMatrices(matrix)) return Optional.empty();
-
-        long start = System.nanoTime();
         Matrix product = matrixFactory.calculateProduct(this, matrix, threads);
-        System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
-
         return Optional.of(product);
     }
 
