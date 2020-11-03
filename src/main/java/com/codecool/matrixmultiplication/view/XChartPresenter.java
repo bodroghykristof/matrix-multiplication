@@ -8,11 +8,13 @@ import org.knowm.xchart.style.Styler;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class XChartPresenter extends DataPresenter {
 
     private final CategoryChart chart = new CategoryChartBuilder().width(800).height(600).theme(Styler.ChartTheme.GGPlot2).build();
-    private final ExecutorService loadingExecutor = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService loadingExecutor = Executors.newSingleThreadScheduledExecutor();
 
     public XChartPresenter(String title, String xTitle, String yTitle) {
         this.chart.setTitle(title);
@@ -32,12 +34,22 @@ public class XChartPresenter extends DataPresenter {
 
     @Override
     public void startLoading() {
-        loadingExecutor.submit(() -> System.out.println("Loading has started"));
+        Runnable runnable = () -> {
+            for (int i = 1; i <= 3; i++) {
+                System.out.print("\rComputing products" + ".".repeat(i));
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        loadingExecutor.scheduleAtFixedRate(runnable, 0, 3, TimeUnit.SECONDS);
     }
 
     @Override
     public void finishLoading() {
-        loadingExecutor.submit(() -> System.out.println("Loading has finished"));
+        loadingExecutor.submit(() -> System.out.println("\rLoading has finished"));
         loadingExecutor.shutdown();
     }
 }
