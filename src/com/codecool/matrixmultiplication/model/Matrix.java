@@ -2,7 +2,12 @@ package com.codecool.matrixmultiplication.model;
 
 import com.codecool.matrixmultiplication.utility.RandomUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Matrix {
 
@@ -49,7 +54,7 @@ public class Matrix {
         }
     }
 
-    public Optional<Matrix> multiply(Matrix matrix) {
+    public Optional<Matrix> multiply(Matrix matrix, int threads) {
 
         if (this.columns != matrix.rows) {
             System.out.println("Matrices could not be multiplied " +
@@ -57,19 +62,39 @@ public class Matrix {
             return Optional.empty();
         }
 
+        long start = System.nanoTime();
+        Matrix product = calculateProductValues(matrix, threads);
+        System.out.println("Time taken: " + (System.nanoTime() - start) / 1000000 + " ms");
+        return Optional.of(product);
+    }
+
+    private Matrix calculateProductValues(Matrix matrix, int threads) {
+
         Matrix product = new Matrix(this.rows, matrix.columns);
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        List<Callable<Object>> tasks = new ArrayList<>();
 
         for (int rowIndex = 0; rowIndex < product.rows; rowIndex++) {
-            for (int columnIndex = 0; columnIndex < product.columns; columnIndex++) {
-                int value = 0;
-                for (int i = 0; i < this.columns; i++) {
-                    value += (this.get(rowIndex, i) * matrix.get(i, columnIndex));
+            int finalRowIndex = rowIndex;
+            Runnable runnable = () -> {
+                for (int columnIndex = 0; columnIndex < product.columns; columnIndex++) {
+                    int value = 0;
+                    for (int i = 0; i < this.columns; i++) {
+                        value += (this.get(finalRowIndex, i) * matrix.get(i, columnIndex));
+                    }
+                    product.set(finalRowIndex, columnIndex, value);
                 }
-                product.set(rowIndex, columnIndex, value);
-            }
+            };
+            tasks.add(Executors.callable(runnable));
         }
 
-        return Optional.of(product);
+        try {
+            executor.invokeAll(tasks);
+            executor.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return product;
     }
 
     @Override
